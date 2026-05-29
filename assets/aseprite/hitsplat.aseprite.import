@@ -1,0 +1,14 @@
+[remap]
+
+importer="aseprite_wizard.plugin.noop"
+type="PackedDataContainer"
+uid="uid://c5vwb3w0ngvcu"
+path="res://.godot/imported/hitsplat.aseprite-45a0d53fcc3df72677c8f2b15b93f6c1.res"
+
+[deps]
+
+source_file="res://assets/aseprite/hitsplat.aseprite"
+dest_files=["res://.godot/imported/hitsplat.aseprite-45a0d53fcc3df72677c8f2b15b93f6c1.res"]
+
+[params]
+

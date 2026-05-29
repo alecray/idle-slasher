@@ -1,0 +1,136 @@
+[gd_scene format=4 uid="uid://coyetuc1dlyve"]
+
+[ext_resource type="Script" uid="uid://xkssm6m8o3fv" path="res://scripts/enemy.gd" id="1_enemy"]
+
+[sub_resource type="PortableCompressedTexture2D" id="PortableCompressedTexture2D_b0wit"]
+_data = PackedByteArray("AAADAAUAAAABAAAAQAAAADAAAADYAAAAUklGRtAAAABXRUJQVlA4TMQAAAAvP8ALEC+gJgABNqYC14pATdtGcLQEOpXKc3fzEWTbTGFzuj/CVeY/AJxLSc4u/oPjSJIcpa93+O95MBBxf5QBJxxA+e/M9Sr0M6L/E4AfOrJWpHokIkseajyZeiQixXgyAVKMJ1MP5Y5SpxhPJv6/28TYVxoH5fuhbLs6Lwo7JH2nbFiRicw9Wt/UGJZavXKw1hfYAd7ALnhOb1Y3gpU6quZ2AevYhuJlLQQDMCLsYakxpz3BRkkHfGXYVyoNzVoSALMA")
+size_override = Vector2(64, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3yryh"]
+atlas = SubResource("PortableCompressedTexture2D_b0wit")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m6nwb"]
+atlas = SubResource("PortableCompressedTexture2D_b0wit")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q0vxe"]
+atlas = SubResource("PortableCompressedTexture2D_b0wit")
+region = Rect2(0, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tyauu"]
+atlas = SubResource("PortableCompressedTexture2D_b0wit")
+region = Rect2(16, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_teeyi"]
+atlas = SubResource("PortableCompressedTexture2D_b0wit")
+region = Rect2(32, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h6l6k"]
+atlas = SubResource("PortableCompressedTexture2D_b0wit")
+region = Rect2(48, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f0ahd"]
+atlas = SubResource("PortableCompressedTexture2D_b0wit")
+region = Rect2(0, 32, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w6v6d"]
+atlas = SubResource("PortableCompressedTexture2D_b0wit")
+region = Rect2(16, 32, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j24ik"]
+atlas = SubResource("PortableCompressedTexture2D_b0wit")
+region = Rect2(32, 32, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gmfsv"]
+atlas = SubResource("PortableCompressedTexture2D_b0wit")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kn3f1"]
+atlas = SubResource("PortableCompressedTexture2D_b0wit")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_3xy2s"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3yryh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m6nwb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q0vxe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tyauu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_teeyi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3yryh")
+}],
+"loop": true,
+"name": &"Attack",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3yryh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h6l6k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f0ahd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w6v6d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j24ik")
+}],
+"loop": false,
+"name": &"Death",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3yryh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gmfsv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kn3f1")
+}],
+"loop": true,
+"name": &"Walk",
+"speed": 10.0
+}]
+
+[node name="Enemy" type="Node2D" unique_id=2127130780]
+script = ExtResource("1_enemy")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1357029452]
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_3xy2s")
+animation = &"Walk"
+metadata/_aseprite_wizard_interface_config_ = {
+"pending_changes": {}
+}
+metadata/_aseprite_wizard_config_ = {
+"embed_tex": true,
+"layers": [],
+"o_ex_p": "",
+"o_folder": "",
+"o_name": "",
+"only_visible": false,
+"scale": "1.0",
+"should_round_fps": true,
+"slice": "",
+"source": "res://assets/aseprite/enemy-1.aseprite",
+"source_uid": 313931999733717913
+}
+metadata/_aseprite_wizard_source_file_hash_ = "54e5a189322f9e3887be675fa412750e"

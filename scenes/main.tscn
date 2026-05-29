@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://btbns5m3x1wwl" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" uid="uid://byaylg4y1weph" path="res://scripts/player.gd" id="2_player"]
 [ext_resource type="Texture2D" uid="uid://bpoo8wm7t01sx" path="res://assets/aseprite/background.png" id="3_bg"]
+[ext_resource type="Script" path="res://scripts/version_label.gd" id="4_ver"]
 
 [sub_resource type="PortableCompressedTexture2D" id="PortableCompressedTexture2D_0wfyh"]
 _data = PackedByteArray("AAADAAUAAAABAAAAKAAAAFAAAABeAQAAUklGRlYBAABXRUJQVlA4TEoBAAAvJ8ATEEegoG0bpvwBdgj+paOobSOm/Dnde08gh+GIBCBc8X+CDaoZDFDmPwCYz4ARIntBpFwX9TeAHEmSIikHzKrEWH6TAtQC7R7Oc3lb7umq7D6+Z0T/GbhtG8futkDe7V8ANRLPeDCyHDXjo5nlgxHjo1HjuHuvEVarVTvvOX1Ksw4BuxDMUzxH7JD4OgTCcewsj5QfP4/HMpXweKQ8Wq7HL+TWNe2jrkk2GlpeV7XNpkgdOZNstXrueYfmopJ6Stk6vPS8w7pVST2ljHsdAunmqF1auZ56KVTSOxT4mNtBzY51o9HtYkZH6NF3Ru06sNFRj2ZK8jztoQCXH0wnAgB7QEDcwnlu1UDFTGTe2wsg+z0hgtbvBBkL3Az/AkfkMBn2fFaQVLM/G4WZZq442kMB/AR/6mmCUu+L9PlQ8A29x3/fgq/2ngs=")
@@ -417,6 +418,15 @@ offset_bottom = 14.0
 theme_override_font_sizes/font_size = 8
 text = "Wave 1"
 
+[node name="PBLabel" type="Label" parent="HUD" unique_id=987654321]
+offset_left = 4.0
+offset_top = 15.0
+offset_right = 100.0
+offset_bottom = 22.0
+theme_override_colors/font_color = Color(0.329, 0.306, 0.408, 1)
+theme_override_font_sizes/font_size = 6
+text = "(PB: 1)"
+
 [node name="HPLabel" type="Label" parent="HUD" unique_id=2046693187]
 visible = false
 offset_left = 4.0
@@ -455,13 +465,13 @@ visible = false
 offset_top = 97.0
 offset_right = 320.0
 offset_bottom = 117.0
-theme_override_colors/font_color = Color(0.8, 0.1, 0.1, 1)
+theme_override_colors/font_color = Color(0.553, 0.412, 0.478, 1)
 theme_override_font_sizes/font_size = 16
 text = "GAME OVER"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ContinueLabel" type="Label" parent="HUD" unique_id=312756894]
+[node name="ContinueLabel" type="Button" parent="HUD" unique_id=312756894]
 visible = false
 offset_left = 60.0
 offset_top = 122.0
@@ -469,6 +479,26 @@ offset_right = 260.0
 offset_bottom = 132.0
 theme_override_font_sizes/font_size = 8
 text = "continue 10s"
+horizontal_alignment = 1
+
+[node name="RetireButton" type="Button" parent="HUD" unique_id=876543210]
+visible = false
+offset_left = 80.0
+offset_top = 135.0
+offset_right = 240.0
+offset_bottom = 145.0
+theme_override_font_sizes/font_size = 6
+text = "retire + upgrade"
+
+[node name="VersionLabel" type="Label" parent="HUD" unique_id=135792468]
+offset_left = 220.0
+offset_top = 172.0
+offset_right = 318.0
+offset_bottom = 180.0
+theme_override_colors/font_color = Color(0.329, 0.306, 0.408, 1)
+theme_override_font_sizes/font_size = 5
+horizontal_alignment = 2
+script = ExtResource("4_ver")
 horizontal_alignment = 1
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=504385229]

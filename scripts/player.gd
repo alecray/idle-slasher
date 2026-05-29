@@ -6,7 +6,7 @@ signal hp_changed(new_hp: int)
 @onready var _body: AnimatedSprite2D = $Body
 @onready var _weapon: AnimatedSprite2D = $Weapon
 
-var _hp: int = CONSTANTS.PLAYER_MAX_HP
+var _hp: int = SAVE_DATA.get_max_hp()
 var _hp_bar_alpha: float = 1.0
 var _dead: bool = false
 var _is_attacking: bool = false
@@ -44,7 +44,7 @@ func _process(_delta: float) -> void:
 			continue
 		if weapon_rect.has_point((enemy as Node2D).global_position):
 			_hit_this_swing.append(enemy)
-			enemy.call("take_damage", 1)
+			enemy.call("take_damage", SAVE_DATA.get_damage())
 
 func _get_weapon_global_rect() -> Rect2:
 	if _weapon.sprite_frames == null:
@@ -71,7 +71,7 @@ func get_hp() -> int:
 	return _hp
 
 func reset() -> void:
-	_hp = CONSTANTS.PLAYER_MAX_HP
+	_hp = SAVE_DATA.get_max_hp()
 	_hp_bar_alpha = 1.0
 	_dead = false
 	_is_attacking = false
@@ -86,7 +86,7 @@ func reset() -> void:
 func heal(amount: int) -> void:
 	if _dead:
 		return
-	_hp = mini(_hp + amount, CONSTANTS.PLAYER_MAX_HP)
+	_hp = mini(_hp + amount, SAVE_DATA.get_max_hp())
 	hp_changed.emit(_hp)
 	queue_redraw()
 
@@ -115,20 +115,20 @@ func _start_death() -> void:
 	, 1.0, 0.0, 0.4)
 
 func _draw() -> void:
-	var t: float = float(_hp) / float(CONSTANTS.PLAYER_MAX_HP)
-	var bar_fill: Color = Color(0.2, 0.8, 0.25).lerp(Color(0.85, 0.15, 0.15), 1.0 - t)
+	var t: float = float(_hp) / float(SAVE_DATA.get_max_hp())
+	var bar_fill: Color = Color(1.0, 0.831, 0.639).lerp(Color(0.553, 0.412, 0.478), 1.0 - t)
 	bar_fill.a = _hp_bar_alpha
-	draw_rect(Rect2(-8.0, -26.0, 16.0, 2.0), Color(0.15, 0.15, 0.15, _hp_bar_alpha))
+	draw_rect(Rect2(-8.0, -26.0, 16.0, 2.0), Color(0.051, 0.169, 0.271, _hp_bar_alpha))
 	draw_rect(Rect2(-8.0, -26.0, 16.0 * t, 2.0), bar_fill)
 	if _body.sprite_frames != null and not _body.sprite_frames.get_animation_names().is_empty():
 		return
-	var body_color: Color = Color(0.08, 0.08, 0.08)
+	var body_color: Color = Color(0.051, 0.169, 0.271)
 	draw_circle(Vector2(0, -14), 3, body_color)
 	draw_line(Vector2(0, -11), Vector2(0, -4), body_color, 1.0)
 	if _is_attacking:
 		draw_line(Vector2(0, -9), Vector2(-4, -12), body_color, 1.0)
 		draw_line(Vector2(0, -9), Vector2(6, -7), body_color, 1.0)
-		draw_line(Vector2(6, -7), Vector2(CONSTANTS.PLAYER_ATTACK_RANGE * 0.55, -3.0), Color(0.65, 0.65, 0.78), 1.0)
+		draw_line(Vector2(6, -7), Vector2(CONSTANTS.PLAYER_ATTACK_RANGE * 0.55, -3.0), Color(0.329, 0.306, 0.408), 1.0)
 	else:
 		draw_line(Vector2(0, -9), Vector2(-4, -5), body_color, 1.0)
 		draw_line(Vector2(0, -9), Vector2(4, -5), body_color, 1.0)

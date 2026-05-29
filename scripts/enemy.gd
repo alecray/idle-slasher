@@ -2,7 +2,6 @@ extends Node2D
 
 signal killed(spawns_qte: bool)
 
-const _QTE_CHANCE: float = 0.08
 
 @onready var _sprite: AnimatedSprite2D = $AnimatedSprite2D
 
@@ -26,12 +25,12 @@ func init(wave: int, enemy_type: int) -> void:
 	_speed = CONSTANTS.ENEMY_BASE_SPEED + (wave - 1) * CONSTANTS.ENEMY_SPEED_PER_WAVE
 	_max_hp = enemy_type * 2
 	_hp = _max_hp
-	if randf() < _QTE_CHANCE:
+	if randf() < SAVE_DATA.get_qte_chance():
 		_is_qte_enemy = true
 		_setup_qte_visuals()
 
 func _setup_qte_visuals() -> void:
-	modulate = Color(1.5, 1.15, 0.05)
+	modulate = Color(1.0, 0.831, 0.639)
 	var particles := CPUParticles2D.new()
 	particles.emitting = true
 	particles.amount = 8
@@ -47,7 +46,7 @@ func _setup_qte_visuals() -> void:
 	particles.initial_velocity_max = 18.0
 	particles.scale_amount_min = 0.5
 	particles.scale_amount_max = 1.5
-	particles.color = Color(1.0, 0.85, 0.1)
+	particles.color = Color(1.0, 0.667, 0.369)
 	add_child(particles)
 
 const _RUSH_MIN_DIST: float = 100.0
@@ -107,8 +106,8 @@ func _draw() -> void:
 	var bar_x: float = -bar_w * 0.5
 	var bar_y: float = -22.0
 	var t: float = float(_hp) / float(_max_hp)
-	draw_rect(Rect2(bar_x, bar_y, bar_w, bar_h), Color(0.15, 0.15, 0.15))
-	draw_rect(Rect2(bar_x, bar_y, bar_w * t, bar_h), Color(0.2, 0.8, 0.25).lerp(Color(0.85, 0.15, 0.15), 1.0 - t))
+	draw_rect(Rect2(bar_x, bar_y, bar_w, bar_h), Color(0.051, 0.169, 0.271))
+	draw_rect(Rect2(bar_x, bar_y, bar_w * t, bar_h), Color(1.0, 0.831, 0.639).lerp(Color(0.553, 0.412, 0.478), 1.0 - t))
 
 func _die() -> void:
 	if _sprite.sprite_frames != null and _sprite.sprite_frames.has_animation("Death"):

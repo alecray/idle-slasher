@@ -16,11 +16,13 @@ const SHAKE_DECAY: float = 5.0
 @onready var _player: Node2D = $Player
 @onready var _enemy_container: Node2D = $EnemyContainer
 @onready var _wave_label: Label = $HUD/WaveLabel
+@onready var _pb_label: Label = $HUD/PBLabel
 @onready var _click_hint: Label = $HUD/ClickHint
 @onready var _clicks_label: Label = $HUD/ClicksLabel
 @onready var _kills_label: Label = $HUD/KillsLabel
 @onready var _game_over_label: Label = $HUD/GameOverLabel
-@onready var _continue_label: Label = $HUD/ContinueLabel
+@onready var _continue_label: Button = $HUD/ContinueLabel
+@onready var _retire_button: Button = $HUD/RetireButton
 
 var _wave: int = 1
 var _clicks: int = 0
@@ -53,13 +55,23 @@ func _ready() -> void:
 	_camera.make_current()
 
 	_damage_flash = ColorRect.new()
-	_damage_flash.color = Color(0.8, 0.1, 0.1, 0.0)
+	_damage_flash.color = Color(0.553, 0.412, 0.478, 0.0)
 	_damage_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_damage_flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	$HUD.add_child(_damage_flash)
 
 	_game_over_label.visible = false
 	_continue_label.visible = false
+	_retire_button.visible = false
+	var _empty2 := StyleBoxEmpty.new()
+	for btn: Button in [_continue_label, _retire_button]:
+		for state: String in ["normal", "hover", "pressed", "focus"]:
+			btn.add_theme_stylebox_override(state, _empty2)
+		btn.add_theme_color_override("font_color", Color(0.329, 0.306, 0.408))
+		btn.add_theme_color_override("font_hover_color", Color(1.0, 0.667, 0.369))
+		btn.add_theme_color_override("font_pressed_color", Color(1.0, 0.831, 0.639))
+	_retire_button.pressed.connect(_go_to_upgrade_menu)
+	_continue_label.pressed.connect(_do_continue)
 	_death_mat = ShaderMaterial.new()
 	_death_mat.shader = DEATH_SHADER
 	_death_mat.set_shader_parameter("wave_amount", 0.45)
@@ -67,6 +79,8 @@ func _ready() -> void:
 	_player.connect("died", _on_player_died)
 	_player.connect("hp_changed", _on_hp_changed)
 	_setup_dust()
+	_wave = SAVE_DATA.get_start_wave()
+	_pb_label.text = "(PB: %d)" % SAVE_DATA.pb_wave
 	_start_wave()
 
 func _setup_dust() -> void:
@@ -103,6 +117,12 @@ func _start_wave() -> void:
 	_next_spawn_interval = _random_spawn_interval()
 	_between_waves = false
 	_wave_label.text = "Wave %d" % _wave
+	if _wave > SAVE_DATA.pb_wave:
+		SAVE_DATA.pb_wave = _wave
+		SAVE_DATA.save_data()
+		_pb_label.text = "(PB: %d)" % SAVE_DATA.pb_wave
+	if _wave > SAVE_DATA.get_start_wave():
+		SAVE_DATA.add_points(1)
 	_wave_label.scale = Vector2(1.35, 1.35)
 	create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT) \
 		.tween_property(_wave_label, "scale", Vector2.ONE, 0.45)
@@ -121,7 +141,8 @@ func _process(delta: float) -> void:
 			_continue_timer -= delta
 			_continue_label.text = "continue %ds" % maxi(0, ceili(_continue_timer))
 			if _continue_timer <= 0.0:
-				_do_continue()
+				_continue_timer = -1.0
+				_go_to_upgrade_menu()
 		return
 	if _between_waves:
 		_wave_pause_timer -= delta
@@ -138,13 +159,17 @@ func _process(delta: float) -> void:
 	elif get_tree().get_nodes_in_group("enemies").is_empty():
 		_between_waves = true
 		_wave_pause_timer = CONSTANTS.WAVE_PAUSE
-		_wave_label.text = "Wave %d\nComplete!" % _wave
+		_spawn_wave_cleared()
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey:
+		var k := event as InputEventKey
+		if k.pressed and not k.echo and k.physical_keycode in [KEY_W, KEY_A, KEY_S, KEY_D]:
+			_spawn_player_speech("nah i dont need to move")
 	if _game_over:
 		if _continue_timer >= 0.0 and event is InputEventMouseButton:
-			var mb := event as InputEventMouseButton
-			if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			var go_mb := event as InputEventMouseButton
+			if go_mb.pressed and go_mb.button_index == MOUSE_BUTTON_LEFT:
 				_do_continue()
 		return
 	if _qte_active:
@@ -205,7 +230,7 @@ func _on_hp_changed(_new_hp: int) -> void:
 func _on_enemy_killed(spawns_qte: bool) -> void:
 	_kills += 1
 	_kills_label.text = "Kills: %d" % _kills
-	if randf() < 0.20:
+	if randf() < SAVE_DATA.get_heal_chance():
 		_player.call("heal", 1)
 		_spawn_heal_popup(1)
 	if spawns_qte and not _qte_active and not _game_over:
@@ -236,7 +261,7 @@ func _spawn_failure_popup() -> void:
 	var label := Label.new()
 	label.text = "MISS!"
 	label.add_theme_font_size_override("font_size", 24)
-	label.add_theme_color_override("font_color", Color(0.95, 0.08, 0.08))
+	label.add_theme_color_override("font_color", Color(0.553, 0.412, 0.478))
 	label.offset_left = 0.0
 	label.offset_top = 60.0
 	label.offset_right = 320.0
@@ -256,7 +281,7 @@ func _spawn_heal_popup(amount: int) -> void:
 	var label := Label.new()
 	label.text = "+%d" % amount
 	label.add_theme_font_size_override("font_size", 8)
-	label.add_theme_color_override("font_color", Color(0.3, 0.95, 0.4))
+	label.add_theme_color_override("font_color", Color(1.0, 0.925, 0.839))
 	label.offset_left = 140.0
 	label.offset_top = 86.0
 	label.offset_right = 180.0
@@ -270,11 +295,47 @@ func _spawn_heal_popup(amount: int) -> void:
 	t.tween_property(label, "modulate:a", 0.0, 0.6)
 	t.chain().tween_callback(label.queue_free)
 
+func _spawn_player_speech(text: String) -> void:
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 5)
+	label.add_theme_color_override("font_color", Color(1.0, 0.925, 0.839))
+	label.offset_left = 68.0
+	label.offset_top = 108.0
+	label.offset_right = 220.0
+	label.offset_bottom = 116.0
+	$HUD.add_child(label)
+	var t := create_tween()
+	t.set_parallel(true)
+	t.tween_property(label, "position", Vector2(68.0, 98.0), 1.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	t.tween_property(label, "modulate:a", 0.0, 1.8)
+	t.chain().tween_callback(label.queue_free)
+
+func _spawn_wave_cleared() -> void:
+	var label := Label.new()
+	label.text = "wave cleared"
+	label.add_theme_font_size_override("font_size", 10)
+	label.add_theme_color_override("font_color", Color(1.0, 0.831, 0.639))
+	label.offset_left = 0.0
+	label.offset_top = 82.0
+	label.offset_right = 320.0
+	label.offset_bottom = 98.0
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.pivot_offset = Vector2(160.0, 8.0)
+	label.scale = Vector2(1.3, 1.3)
+	$HUD.add_child(label)
+	var t := create_tween()
+	t.tween_property(label, "scale", Vector2.ONE, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_interval(1.2)
+	t.tween_property(label, "modulate:a", 0.0, 0.4)
+	t.tween_callback(label.queue_free)
+
 func _spawn_floating_text(text: String) -> void:
 	var label := Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", 6)
-	label.add_theme_color_override("font_color", Color(0.95, 0.9, 0.25))
+	label.add_theme_color_override("font_color", Color(1.0, 0.667, 0.369))
 	label.offset_left = 0.0
 	label.offset_top = 82.0
 	label.offset_right = 320.0
@@ -309,7 +370,7 @@ const DEATH_ZOOM_DURATION: float = 1.4
 
 func _on_player_died() -> void:
 	_game_over = true
-	_continue_wave = maxi(1, _wave - 5)
+	_continue_wave = maxi(SAVE_DATA.get_start_wave(), _wave - 1)
 	_shake_trauma = minf(1.0, _shake_trauma + 0.8)
 	_death_zoom_tween = create_tween()
 	_death_zoom_tween.tween_property(_camera, "zoom", DEATH_ZOOM, DEATH_ZOOM_DURATION) \
@@ -327,12 +388,24 @@ func _on_player_died() -> void:
 	_death_seq_tween.tween_callback(func() -> void:
 		var waves_lost: int = _wave - _continue_wave
 		_continue_label.visible = true
+		_retire_button.visible = true
 		_continue_timer = 10.0
 		if waves_lost > 0:
 			_spawn_wave_loss_popup(waves_lost)
 	)
 	_death_seq_tween.tween_interval(0.5)
 	_death_seq_tween.tween_method(func(v: float) -> void: _death_mat.set_shader_parameter("wave_amount", v), 0.45, 0.0, 2.5)
+
+func _go_to_upgrade_menu() -> void:
+	_continue_label.visible = false
+	var overlay := ColorRect.new()
+	overlay.color = Color(0.051, 0.169, 0.271, 0.0)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$HUD.add_child(overlay)
+	var tween := create_tween()
+	tween.tween_property(overlay, "color:a", 1.0, 0.6)
+	tween.tween_callback(func() -> void: get_tree().change_scene_to_file("res://scenes/upgrade_menu.tscn"))
 
 func _do_continue() -> void:
 	if _continue_timer < 0.0:
@@ -363,6 +436,7 @@ func _restart_from_wave(wave: int) -> void:
 	_player.call("reset")
 	_game_over_label.visible = false
 	_continue_label.visible = false
+	_retire_button.visible = false
 	_clicks_label.text = "Clicks: 0"
 	_kills_label.text = "Kills: 0"
 	_death_mat.set_shader_parameter("wave_amount", 0.45)
@@ -372,7 +446,7 @@ func _spawn_wave_loss_popup(lost: int) -> void:
 	var label := Label.new()
 	label.text = "-%d" % lost
 	label.add_theme_font_size_override("font_size", 8)
-	label.add_theme_color_override("font_color", Color(0.95, 0.25, 0.25))
+	label.add_theme_color_override("font_color", Color(0.553, 0.412, 0.478))
 	label.offset_left = 4.0
 	label.offset_top = 4.0
 	label.offset_right = 80.0

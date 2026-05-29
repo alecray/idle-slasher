@@ -10,12 +10,17 @@ const _DOT_SPEED: float = 155.0
 const _BAR_X: float = 60.0
 const _BAR_Y: float = 83.0
 
+const _COUNTDOWN_TIME: float = 0.38
+
 var _dot_pos: float = 0.0
 var _dot_vel: float = 0.0
 var _zone_left: float = 0.0
 var _dot_ctrl: ColorRect
 var _resolved: bool = false
 var _accepting_input: bool = false
+var _countdown: int = 3
+var _countdown_timer: float = 0.38
+var _countdown_label: Label
 
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
@@ -27,13 +32,13 @@ func _ready() -> void:
 	_dot_vel = _DOT_SPEED * (1.0 if randf() > 0.5 else -1.0)
 
 	var overlay := ColorRect.new()
-	overlay.color = Color(0.0, 0.0, 0.0, 0.5)
+	overlay.color = Color(0.051, 0.169, 0.271, 0.75)
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(overlay)
 
 	var bar_bg := ColorRect.new()
-	bar_bg.color = Color(0.12, 0.12, 0.12)
+	bar_bg.color = Color(0.051, 0.169, 0.271)
 	bar_bg.offset_left = _BAR_X
 	bar_bg.offset_top = _BAR_Y
 	bar_bg.offset_right = _BAR_X + _BAR_W
@@ -42,7 +47,7 @@ func _ready() -> void:
 	add_child(bar_bg)
 
 	var zone := ColorRect.new()
-	zone.color = Color(0.18, 0.68, 0.22)
+	zone.color = Color(1.0, 0.667, 0.369)
 	zone.offset_left = _BAR_X + _zone_left
 	zone.offset_top = _BAR_Y
 	zone.offset_right = _BAR_X + _zone_left + _ZONE_W
@@ -52,7 +57,7 @@ func _ready() -> void:
 
 	for edge_x: float in [_zone_left, _zone_left + _ZONE_W]:
 		var marker := ColorRect.new()
-		marker.color = Color(1.0, 1.0, 1.0)
+		marker.color = Color(1.0, 0.925, 0.839)
 		marker.offset_left = _BAR_X + edge_x - 1.0
 		marker.offset_top = _BAR_Y - 2.0
 		marker.offset_right = _BAR_X + edge_x + 1.0
@@ -61,14 +66,43 @@ func _ready() -> void:
 		add_child(marker)
 
 	_dot_ctrl = ColorRect.new()
-	_dot_ctrl.color = Color(0.95, 0.95, 0.95)
+	_dot_ctrl.color = Color(1.0, 0.925, 0.839)
 	_dot_ctrl.offset_top = _BAR_Y + 1.0
 	_dot_ctrl.offset_bottom = _BAR_Y + _BAR_H - 1.0
 	_dot_ctrl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_dot_ctrl)
 	_update_dot()
 
+	_countdown_label = Label.new()
+	_countdown_label.add_theme_font_size_override("font_size", 20)
+	_countdown_label.offset_left = 0.0
+	_countdown_label.offset_top = 55.0
+	_countdown_label.offset_right = 320.0
+	_countdown_label.offset_bottom = 80.0
+	_countdown_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_countdown_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_countdown_label.pivot_offset = Vector2(160.0, 12.0)
+	_countdown_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_countdown_label)
+	_punch_countdown()
+
+func _punch_countdown() -> void:
+	_countdown_label.text = str(_countdown)
+	_countdown_label.scale = Vector2(1.6, 1.6)
+	create_tween().tween_property(_countdown_label, "scale", Vector2.ONE, 0.25) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
 func _process(delta: float) -> void:
+	if _countdown > 0:
+		_countdown_timer -= delta
+		if _countdown_timer <= 0.0:
+			_countdown -= 1
+			_countdown_timer = _COUNTDOWN_TIME
+			if _countdown > 0:
+				_punch_countdown()
+			else:
+				_countdown_label.queue_free()
+		return
 	if not _accepting_input:
 		_accepting_input = true
 		return
@@ -108,7 +142,7 @@ func _resolve() -> void:
 	var result_label := Label.new()
 	result_label.text = "HIT!" if success else "MISS!"
 	result_label.add_theme_font_size_override("font_size", 8)
-	result_label.add_theme_color_override("font_color", Color(0.3, 0.95, 0.4) if success else Color(0.95, 0.25, 0.25))
+	result_label.add_theme_color_override("font_color", Color(1.0, 0.925, 0.839) if success else Color(0.553, 0.412, 0.478))
 	result_label.offset_left = 0.0
 	result_label.offset_top = 98.0
 	result_label.offset_right = 320.0

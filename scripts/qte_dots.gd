@@ -27,13 +27,13 @@ func _ready() -> void:
 	_total_dots = randi_range(_MIN_DOTS, _MAX_DOTS)
 
 	var overlay := ColorRect.new()
-	overlay.color = Color(0.0, 0.0, 0.0, 0.45)
+	overlay.color = Color(0.051, 0.169, 0.271, 0.75)
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(overlay)
 
 	var timer_bg := ColorRect.new()
-	timer_bg.color = Color(0.12, 0.12, 0.12)
+	timer_bg.color = Color(0.051, 0.169, 0.271)
 	timer_bg.offset_left = _TIMER_X
 	timer_bg.offset_top = _TIMER_Y
 	timer_bg.offset_right = _TIMER_X + _TIMER_W
@@ -42,7 +42,7 @@ func _ready() -> void:
 	add_child(timer_bg)
 
 	_timer_fill = ColorRect.new()
-	_timer_fill.color = Color(0.82, 0.18, 0.12)
+	_timer_fill.color = Color(0.553, 0.412, 0.478)
 	_timer_fill.offset_left = _TIMER_X
 	_timer_fill.offset_top = _TIMER_Y
 	_timer_fill.offset_right = _TIMER_X

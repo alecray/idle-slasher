@@ -5,9 +5,12 @@ const ENEMY_SCENES: Array[PackedScene] = [
 	preload("res://prefabs/enemy-2.tscn"),
 	preload("res://prefabs/enemy-3.tscn"),
 	preload("res://prefabs/enemy-4.tscn"),
+	preload("res://prefabs/enemy-5.tscn"),
+	preload("res://prefabs/enemy-6.tscn"),
 ]
 
 const DEATH_SHADER: Shader = preload("res://assets/shaders/water_text.gdshader")
+const DEV_MENU_SCENE: PackedScene = preload("res://scenes/dev_menu.tscn")
 const QTE_BAR_SCRIPT: GDScript = preload("res://scripts/qte_bar.gd")
 const QTE_DOTS_SCRIPT: GDScript = preload("res://scripts/qte_dots.gd")
 const SHAKE_MAX_OFFSET: float = 2.5
@@ -26,6 +29,7 @@ const SHAKE_DECAY: float = 5.0
 
 var _wave: int = 1
 var _clicks: int = 0
+var _speech_cooldown: float = 0.0
 var _kills: int = 0
 var _game_over: bool = false
 
@@ -47,6 +51,10 @@ var _continue_wave: int = 0
 var _death_zoom_tween: Tween
 var _death_pos_tween: Tween
 var _death_seq_tween: Tween
+
+var _god_mode: bool = false
+var _dev_menu_open: bool = false
+var _dev_menu_layer: Node = null
 
 func _ready() -> void:
 	_camera = Camera2D.new()
@@ -74,41 +82,46 @@ func _ready() -> void:
 	_continue_label.pressed.connect(_do_continue)
 	_death_mat = ShaderMaterial.new()
 	_death_mat.shader = DEATH_SHADER
-	_death_mat.set_shader_parameter("wave_amount", 0.45)
+	_death_mat.set_shader_parameter("wave_amount", 0.85)
 	_game_over_label.material = _death_mat
 	_player.connect("died", _on_player_died)
 	_player.connect("hp_changed", _on_hp_changed)
 	_setup_dust()
 	_wave = SAVE_DATA.get_start_wave()
-	_pb_label.text = "(PB: %d)" % SAVE_DATA.pb_wave
+	_pb_label.text = _pb_text()
 	_start_wave()
 
 func _setup_dust() -> void:
 	_dust = CPUParticles2D.new()
 	_dust.position = Vector2(340.0, 90.0)
-	_dust.lifetime = 9.0
+	_dust.amount = 55
+	_dust.lifetime = 3.5
 	_dust.explosiveness = 0.0
-	_dust.randomness = 0.6
+	_dust.randomness = 0.2
 	_dust.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
 	_dust.emission_rect_extents = Vector2(4.0, 95.0)
 	_dust.direction = Vector2(-1.0, 0.0)
-	_dust.spread = 25.0
-	_dust.gravity = Vector2(0.0, 3.0)
-	_dust.scale_amount_min = 0.4
-	_dust.scale_amount_max = 1.8
+	_dust.spread = 7.0
+	_dust.gravity = Vector2(0.0, 0.8)
+	_dust.scale_amount_min = 0.2
+	_dust.scale_amount_max = 0.9
 	var grad := Gradient.new()
-	grad.set_color(0, Color(0.816, 0.506, 0.349, 0.75))
-	grad.add_point(0.3, Color(1.0, 0.667, 0.369, 0.55))
-	grad.add_point(0.6, Color(1.0, 0.831, 0.639, 0.35))
+	grad.set_color(0, Color(0.816, 0.506, 0.349, 0.9))
+	grad.add_point(0.35, Color(1.0, 0.667, 0.369, 0.7))
+	grad.add_point(0.7, Color(1.0, 0.831, 0.639, 0.35))
 	grad.add_point(1.0, Color(1.0, 0.925, 0.839, 0.0))
 	_dust.color_ramp = grad
 	add_child(_dust)
 	move_child(_dust, _player.get_index())
 
 func _update_dust_for_wave() -> void:
-	_dust.amount = mini(10 + _wave * 2, 60)
-	_dust.initial_velocity_min = minf(15.0 + _wave * 2.5, 90.0)
-	_dust.initial_velocity_max = minf(35.0 + _wave * 4.0, 140.0)
+	_dust.initial_velocity_min = minf(80.0 + _wave * 6.0, 220.0)
+	_dust.initial_velocity_max = minf(180.0 + _wave * 10.0, 380.0)
+
+func _pb_text() -> String:
+	if SAVE_DATA.pb_version.is_empty():
+		return "(PB: %d)" % SAVE_DATA.pb_wave
+	return "(PB: %d v%s)" % [SAVE_DATA.pb_wave, SAVE_DATA.pb_version]
 
 func _start_wave() -> void:
 	_enemies_this_wave = CONSTANTS.WAVE_BASE_COUNT + (_wave - 1) * CONSTANTS.WAVE_COUNT_INCREMENT
@@ -119,8 +132,9 @@ func _start_wave() -> void:
 	_wave_label.text = "Wave %d" % _wave
 	if _wave > SAVE_DATA.pb_wave:
 		SAVE_DATA.pb_wave = _wave
+		SAVE_DATA.pb_version = ProjectSettings.get_setting("application/config/version", "")
 		SAVE_DATA.save_data()
-		_pb_label.text = "(PB: %d)" % SAVE_DATA.pb_wave
+		_pb_label.text = _pb_text()
 	if _wave > SAVE_DATA.get_start_wave():
 		SAVE_DATA.add_points(1)
 	_wave_label.scale = Vector2(1.35, 1.35)
@@ -129,6 +143,9 @@ func _start_wave() -> void:
 	_update_dust_for_wave()
 
 func _process(delta: float) -> void:
+	if _dev_menu_open:
+		return
+	_speech_cooldown = maxf(0.0, _speech_cooldown - delta)
 	_shake_trauma = maxf(0.0, _shake_trauma - SHAKE_DECAY * delta)
 	var shake: float = _shake_trauma * _shake_trauma
 	_camera.offset = Vector2(
@@ -164,20 +181,26 @@ func _process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		var k := event as InputEventKey
-		if k.pressed and not k.echo and k.physical_keycode in [KEY_W, KEY_A, KEY_S, KEY_D]:
-			_spawn_player_speech("nah i dont need to move")
-	if _game_over:
-		if _continue_timer >= 0.0 and event is InputEventMouseButton:
-			var go_mb := event as InputEventMouseButton
-			if go_mb.pressed and go_mb.button_index == MOUSE_BUTTON_LEFT:
-				_do_continue()
-		return
-	if _qte_active:
+		if k.pressed and not k.echo:
+			match k.physical_keycode:
+				KEY_U:
+					if _dev_menu_open:
+						_close_dev_menu()
+					elif not _game_over and not _qte_active:
+						_open_dev_menu()
+					return
+				KEY_ESCAPE:
+					if _dev_menu_open:
+						_close_dev_menu()
+					return
+			if not _dev_menu_open and not _game_over and not _qte_active:
+				if k.physical_keycode in [KEY_W, KEY_A, KEY_S, KEY_D]:
+					if _speech_cooldown <= 0.0:
+						_spawn_player_speech("nah i dont need to move")
+						_speech_cooldown = 3.0
+	if _dev_menu_open or _game_over or _qte_active:
 		return
 	if event is InputEventKey:
-		var key: InputEventKey = event as InputEventKey
-		if key.pressed and not key.echo and key.physical_keycode == KEY_U:
-			_skip_waves(3)
 		return
 	if not event is InputEventMouseButton:
 		return
@@ -192,6 +215,10 @@ func _input(event: InputEvent) -> void:
 	for enemy: Node in get_tree().get_nodes_in_group("enemies"):
 		if is_instance_valid(enemy):
 			enemy.call("rush", player_x)
+	if _god_mode:
+		for enemy: Node in get_tree().get_nodes_in_group("enemies"):
+			if is_instance_valid(enemy):
+				enemy.call("take_damage", 9999)
 
 func _skip_waves(count: int) -> void:
 	_wave += count
@@ -212,20 +239,26 @@ func _pick_enemy_type() -> int:
 	var unlocked: int = mini(int(_wave / float(CONSTANTS.ENEMY_UNLOCK_WAVE)) + 1, ENEMY_SCENES.size())
 	return randi() % unlocked
 
+const _ENEMY_6_FLY_OFFSET: float = -28.0
+
 func _spawn_enemy() -> void:
 	var type_idx: int = _pick_enemy_type()
 	var enemy: Node2D = ENEMY_SCENES[type_idx].instantiate() as Node2D
-	enemy.position = Vector2(CONSTANTS.ENEMY_SPAWN_X, CONSTANTS.GROUND_Y)
+	var spawn_y: float = CONSTANTS.GROUND_Y + (
+		_ENEMY_6_FLY_OFFSET if type_idx == ENEMY_SCENES.size() - 1 else 0.0)
+	enemy.position = Vector2(CONSTANTS.ENEMY_SPAWN_X, spawn_y)
 	_enemy_container.add_child(enemy)
 	enemy.call("init", _wave, type_idx + 1)
 	enemy.connect("killed", _on_enemy_killed)
 	_enemies_spawned += 1
 
-func _on_hp_changed(_new_hp: int) -> void:
+func _on_hp_changed(new_hp: int) -> void:
 	_shake_trauma = minf(1.0, _shake_trauma + 0.5)
 	_damage_flash.color.a = 0.4
 	var tween: Tween = create_tween()
 	tween.tween_property(_damage_flash, "color:a", 0.0, 0.25)
+	if _god_mode and new_hp < SAVE_DATA.get_max_hp() and not _game_over:
+		_player.call("heal", SAVE_DATA.get_max_hp())
 
 func _on_enemy_killed(spawns_qte: bool) -> void:
 	_kills += 1
@@ -279,7 +312,7 @@ func _spawn_failure_popup() -> void:
 
 func _spawn_heal_popup(amount: int) -> void:
 	var label := Label.new()
-	label.text = "+%d" % amount
+	label.text = "+%d hp" % amount
 	label.add_theme_font_size_override("font_size", 8)
 	label.add_theme_color_override("font_color", Color(1.0, 0.925, 0.839))
 	label.offset_left = 140.0
@@ -393,8 +426,8 @@ func _on_player_died() -> void:
 		if waves_lost > 0:
 			_spawn_wave_loss_popup(waves_lost)
 	)
-	_death_seq_tween.tween_interval(0.5)
-	_death_seq_tween.tween_method(func(v: float) -> void: _death_mat.set_shader_parameter("wave_amount", v), 0.45, 0.0, 2.5)
+	_death_seq_tween.tween_interval(0.1)
+	_death_seq_tween.tween_method(func(v: float) -> void: _death_mat.set_shader_parameter("wave_amount", v), 0.85, 0.0, 1.2)
 
 func _go_to_upgrade_menu() -> void:
 	_continue_label.visible = false
@@ -439,7 +472,7 @@ func _restart_from_wave(wave: int) -> void:
 	_retire_button.visible = false
 	_clicks_label.text = "Clicks: 0"
 	_kills_label.text = "Kills: 0"
-	_death_mat.set_shader_parameter("wave_amount", 0.45)
+	_death_mat.set_shader_parameter("wave_amount", 0.85)
 	_start_wave()
 
 func _spawn_wave_loss_popup(lost: int) -> void:
@@ -458,3 +491,26 @@ func _spawn_wave_loss_popup(lost: int) -> void:
 	t.tween_property(label, "position", end_pos, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	t.tween_property(label, "modulate:a", 0.0, 1.2)
 	t.chain().tween_callback(label.queue_free)
+
+func _open_dev_menu() -> void:
+	_dev_menu_open = true
+	_dev_menu_layer = DEV_MENU_SCENE.instantiate()
+	add_child(_dev_menu_layer)
+	_dev_menu_layer.init(_god_mode)
+	_dev_menu_layer.connect("close_requested", _close_dev_menu)
+	_dev_menu_layer.connect("skip_waves_requested", _skip_waves)
+	_dev_menu_layer.connect("god_mode_toggled", func(v: bool) -> void: _god_mode = v)
+	_dev_menu_layer.connect("reset_requested", _dev_reset_game)
+
+func _close_dev_menu() -> void:
+	if not _dev_menu_open:
+		return
+	_dev_menu_open = false
+	if is_instance_valid(_dev_menu_layer):
+		_dev_menu_layer.queue_free()
+	_dev_menu_layer = null
+
+func _dev_reset_game() -> void:
+	_close_dev_menu()
+	SAVE_DATA.reset()
+	get_tree().change_scene_to_file("res://scenes/title_screen.tscn")

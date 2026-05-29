@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://xkssm6m8o3fv" path="res://scripts/enemy.gd" id="1_enemy"]
 
 [sub_resource type="PortableCompressedTexture2D" id="PortableCompressedTexture2D_6vn6t"]
-_data = PackedByteArray("AAADAAUAAAABAAAAUAAAAEAAAADQAQAAUklGRsgBAABXRUJQVlA4TLsBAAAvT8APED+gkI0kaF3Wn2A97hT+Ox0yAYu126u6IDIg04DQRf8EMnjVEMBs8x8A5hmYId5R7leUAMe2trjNZ84Rbq0dcIi3kH5cwCipJdOv1jP7t74fBLZTR/QfgttGjiR7c2hp7/wK3HQ3cVnJJ8ZB+2gR7ZPyCBYSO+2jAdpHeccGQUS6BgSIXQKQ8IEgnIYGELEdtE/SK7APRKSfBF6lAQhguzSgVz5B5HUyiPff9OMJQB5/IBHlgb+eNDbjqAEcGTkaMNxZSgjsAQYs7YYSwkmdcrL4b7vp8h5zfWLWJ2pAPkPO5zAA7blnQHrIm9g1lN0A7aF9MkMe+4SX9kgDEgMfbcIn52F51zRgAQJ5JHwQMgAJtiMAAAYEm/OghhoAvetyQGLX5QC16xqA/7AL2nWFtLTrKuFd13iu9lueVXq/sfi40fJ1KMBl9r2RpiyiARuZCVq1zuT2TVm1rWcAeZkX552fte+ntfcGcA/ryYs7a9/OTwW88+cYZ7ybADP27c6ddA0D3CSA/7UtnVL43cWUF5TXG1xRHX/P1Pu71cgL/rf6amGqr3GcM/X+wc5Xe+BSe/BVji3zAgA=")
+_data = PackedByteArray("AAADAAUAAAABAAAAUAAAAEAAAAAeAgAAUklGRhYCAABXRUJQVlA4TAoCAAAvT8APED+gkI0kaF3Wn2A97hT+Ox0yAYu126u6IDIg04DQRf8EMnjVEMBs8x8A5hmYId5R7leUIMe23jZzPgeArWcL9hrG65hEqYUT1NJJ2L/0gfwphzqi/w7ctnEkea8Xa7F+Bf7ptCgX+USsI5+I7NPzMIVHzT65YODTIgTm7lVABVE7BR0fOGxfBXDXiuzT9TL2gbsvp8CDC0AFWvsFS/Ix94fTIO4/08lTAXl8A4kkD3xbSKNtWy5gfGNywfpBCTP2gBFFG2G2p3/ZFf/btDr2uNUnhj6RC8asI59fK3B35CjoD7lFFeLHiuyRfQZD3paOV/YYFHhURjs+Iw/lXdOAHTDy6PjABgVuWqkAABeYjjwodlkBvi3zBZ1dzxekXV9R8D/MK9r1HHHmjnd9+/8BEQzv+gJepf32aVHyeQrcPWKt7/r7DUn+64nvUTODvZOGKTyoYEB/380FMHevXLDUikx/3825QCsXLHzzemSwb+Lh4+vk8dRBbtp33H/uFHS4ad9t28AFRYn3BzftvJkxhi4XRfEPxx1oJQJ2FiAmvqOmNNyzoKDdjvG1TP6TaGkRVDCFknxEfncCwx78lb0UTMX2aFFATXNT8D2iBJ15m/nQgaUeIdUHeWBkDmBqjq56IhfsxXDwkC70/N0V43Y/7iDpJjPA6QXnYQY/EQHsQR5E0ldlCAA=")
 size_override = Vector2(80, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_f5w11"]
@@ -64,17 +64,21 @@ region = Rect2(16, 48, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_k6tm6"]
 atlas = SubResource("PortableCompressedTexture2D_6vn6t")
-region = Rect2(16, 0, 16, 16)
+region = Rect2(32, 48, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tdnos"]
 atlas = SubResource("PortableCompressedTexture2D_6vn6t")
-region = Rect2(32, 0, 16, 16)
+region = Rect2(16, 0, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_8x1gu"]
 atlas = SubResource("PortableCompressedTexture2D_6vn6t")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_48645"]
+atlas = SubResource("PortableCompressedTexture2D_6vn6t")
 region = Rect2(48, 0, 16, 16)
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_48645"]
+[sub_resource type="SpriteFrames" id="SpriteFrames_gdlne"]
 animations = [{
 "frames": [{
 "duration": 1.0,
@@ -113,6 +117,9 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_f5w11")
+}, {
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_rquaj")
 }, {
 "duration": 1.0,
@@ -126,6 +133,9 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_2tfyh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k6tm6")
 }],
 "loop": false,
 "name": &"Death",
@@ -136,13 +146,13 @@ animations = [{
 "texture": SubResource("AtlasTexture_f5w11")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_k6tm6")
-}, {
-"duration": 1.0,
 "texture": SubResource("AtlasTexture_tdnos")
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_8x1gu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_48645")
 }],
 "loop": true,
 "name": &"Walk",
@@ -154,7 +164,7 @@ script = ExtResource("1_enemy")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1389368927]
 texture_filter = 1
-sprite_frames = SubResource("SpriteFrames_48645")
+sprite_frames = SubResource("SpriteFrames_gdlne")
 animation = &"Walk"
 metadata/_aseprite_wizard_interface_config_ = {
 "output_section": false,
@@ -173,4 +183,4 @@ metadata/_aseprite_wizard_config_ = {
 "source": "res://assets/aseprite/enemy-4.aseprite",
 "source_uid": 1187439277977208976
 }
-metadata/_aseprite_wizard_source_file_hash_ = "a423531faab5ba486514e93f424db059"
+metadata/_aseprite_wizard_source_file_hash_ = "2d60f8051ecea47a50638a69c24bd554"

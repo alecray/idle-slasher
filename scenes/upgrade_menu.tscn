@@ -1,6 +1,6 @@
-[gd_scene format=4 uid="uid://upgrdmenu001"]
+[gd_scene format=4 uid="uid://bq4mr7g2p1nhx"]
 
-[ext_resource type="Script" uid="uid://upgrdscr001" path="res://scripts/upgrade_menu.gd" id="1_um"]
+[ext_resource type="Script" uid="uid://ck1e735as7o8r" path="res://scripts/upgrade_menu.gd" id="1_um"]
 
 [node name="UpgradeMenu" type="Control"]
 anchors_preset = 15
@@ -10,7 +10,7 @@ script = ExtResource("1_um")
 
 [node name="Background" type="ColorRect" parent="."]
 anchors_preset = 15
-color = Color(0.051, 0.169, 0.271)
+color = Color(0.051, 0.169, 0.271, 1)
 
 [node name="TitleLabel" type="Label" parent="."]
 offset_left = 0.0
@@ -26,7 +26,7 @@ offset_left = 0.0
 offset_top = 30.0
 offset_right = 320.0
 offset_bottom = 40.0
-theme_override_colors/font_color = Color(1.0, 0.667, 0.369)
+theme_override_colors/font_color = Color(1.0, 0.667, 0.369, 1)
 theme_override_font_sizes/font_size = 7
 text = "0 POINTS"
 horizontal_alignment = 1
@@ -36,7 +36,7 @@ offset_left = 16.0
 offset_top = 44.0
 offset_right = 304.0
 offset_bottom = 46.0
-color = Color(0.329, 0.306, 0.408)
+color = Color(0.329, 0.306, 0.408, 1)
 
 [node name="HealthRow" type="Control" parent="."]
 offset_left = 8.0
@@ -54,7 +54,7 @@ text = "HEALTH"
 offset_left = 92.0
 offset_right = 148.0
 offset_bottom = 16.0
-theme_override_colors/font_color = Color(1.0, 0.831, 0.639)
+theme_override_colors/font_color = Color(1.0, 0.831, 0.639, 1)
 theme_override_font_sizes/font_size = 7
 text = "LV 0"
 
@@ -62,7 +62,7 @@ text = "LV 0"
 offset_left = 150.0
 offset_right = 242.0
 offset_bottom = 16.0
-theme_override_colors/font_color = Color(1.0, 0.667, 0.369)
+theme_override_colors/font_color = Color(1.0, 0.667, 0.369, 1)
 theme_override_font_sizes/font_size = 6
 text = "+0 MAX HP"
 
@@ -89,7 +89,7 @@ text = "DAMAGE"
 offset_left = 92.0
 offset_right = 148.0
 offset_bottom = 16.0
-theme_override_colors/font_color = Color(1.0, 0.831, 0.639)
+theme_override_colors/font_color = Color(1.0, 0.831, 0.639, 1)
 theme_override_font_sizes/font_size = 7
 text = "LV 0"
 
@@ -97,7 +97,7 @@ text = "LV 0"
 offset_left = 150.0
 offset_right = 242.0
 offset_bottom = 16.0
-theme_override_colors/font_color = Color(1.0, 0.667, 0.369)
+theme_override_colors/font_color = Color(1.0, 0.667, 0.369, 1)
 theme_override_font_sizes/font_size = 6
 text = "+0 DMG"
 
@@ -124,7 +124,7 @@ text = "LUCK"
 offset_left = 92.0
 offset_right = 148.0
 offset_bottom = 16.0
-theme_override_colors/font_color = Color(1.0, 0.831, 0.639)
+theme_override_colors/font_color = Color(1.0, 0.831, 0.639, 1)
 theme_override_font_sizes/font_size = 7
 text = "LV 0"
 
@@ -132,7 +132,7 @@ text = "LV 0"
 offset_left = 150.0
 offset_right = 242.0
 offset_bottom = 16.0
-theme_override_colors/font_color = Color(1.0, 0.667, 0.369)
+theme_override_colors/font_color = Color(1.0, 0.667, 0.369, 1)
 theme_override_font_sizes/font_size = 6
 text = "+0% LUCK"
 
@@ -159,7 +159,7 @@ text = "START WAVE"
 offset_left = 92.0
 offset_right = 148.0
 offset_bottom = 16.0
-theme_override_colors/font_color = Color(1.0, 0.831, 0.639)
+theme_override_colors/font_color = Color(1.0, 0.831, 0.639, 1)
 theme_override_font_sizes/font_size = 7
 text = "LV 0"
 
@@ -167,7 +167,7 @@ text = "LV 0"
 offset_left = 150.0
 offset_right = 242.0
 offset_bottom = 16.0
-theme_override_colors/font_color = Color(1.0, 0.667, 0.369)
+theme_override_colors/font_color = Color(1.0, 0.667, 0.369, 1)
 theme_override_font_sizes/font_size = 6
 text = "W1 START"
 

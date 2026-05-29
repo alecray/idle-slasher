@@ -11,8 +11,8 @@ config_version=5
 [application]
 
 config/name="Idle Slasher"
-config/version="0.1.7"
-run/main_scene="res://scenes/main.tscn"
+config/version="0.1.8"
+run/main_scene="res://scenes/title_screen.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 

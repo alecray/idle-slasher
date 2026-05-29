@@ -8,8 +8,6 @@ extends Control
 const _STAT_KEYS: Array[String] = ["health", "damage", "luck", "start_wave"]
 
 func _ready() -> void:
-	modulate.a = 0.0
-	create_tween().tween_property(self, "modulate:a", 1.0, 0.5)
 
 	var empty := StyleBoxEmpty.new()
 	for row: Control in _rows:
@@ -19,7 +17,7 @@ func _ready() -> void:
 		btn.add_theme_color_override("font_color", Color(1.0, 0.831, 0.639))
 		btn.add_theme_color_override("font_hover_color", Color(1.0, 0.925, 0.839))
 		btn.add_theme_color_override("font_pressed_color", Color(1.0, 0.667, 0.369))
-		btn.add_theme_color_override("font_disabled_color", Color(0.329, 0.306, 0.408))
+		btn.add_theme_color_override("font_disabled_color", Color(0.553, 0.412, 0.478))
 
 	var play_btn: Button = $PlayButton
 	for state: String in ["normal", "hover", "pressed", "focus"]:
@@ -45,16 +43,21 @@ func _refresh() -> void:
 		SAVE_DATA.stat_start_wave,
 	]
 	var effects: Array[String] = [
-		"+%d MAX HP" % (levels[0] * 2),
-		"+%d DMG" % levels[1],
-		"+%d%% LUCK" % (levels[2] * 7),
-		"W%d START" % (1 + levels[3]),
+		"+%d MAX HP" % SAVE_DATA.get_health_bonus(),
+		"+%d DMG" % SAVE_DATA.get_damage_bonus(),
+		"+%.1f%% LUCK" % SAVE_DATA.get_luck_pct(),
+		"W%d START" % SAVE_DATA.get_start_wave(),
 	]
 	for i: int in _rows.size():
 		var row: Control = _rows[i]
-		row.get_node("LevelLabel").text = "LV %d" % levels[i]
+		var key: String = _STAT_KEYS[i]
+		var maxed: bool = SAVE_DATA.is_stat_maxed(key)
+		var max_lv: int = SAVE_DATA.MAX_LEVEL[key]
+		row.get_node("LevelLabel").text = "MAX" if maxed else "LV %d/%d" % [levels[i], max_lv]
 		row.get_node("EffectLabel").text = effects[i]
-		row.get_node("PlusButton").disabled = SAVE_DATA.points <= 0
+		var btn: Button = row.get_node("PlusButton")
+		btn.disabled = SAVE_DATA.points <= 0 or maxed
+		btn.text = "-" if maxed else "+"
 
 func _on_plus(stat: String) -> void:
 	if SAVE_DATA.try_spend_point(stat):

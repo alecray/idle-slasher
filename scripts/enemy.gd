@@ -23,7 +23,7 @@ func _ready() -> void:
 
 func init(wave: int, enemy_type: int) -> void:
 	_speed = CONSTANTS.ENEMY_BASE_SPEED + (wave - 1) * CONSTANTS.ENEMY_SPEED_PER_WAVE
-	_max_hp = enemy_type * 2
+	_max_hp = enemy_type * 2 + int((wave - 1) * CONSTANTS.ENEMY_HP_PER_WAVE)
 	_hp = _max_hp
 	if randf() < SAVE_DATA.get_qte_chance():
 		_is_qte_enemy = true

@@ -11,6 +11,8 @@ var _hp_bar_alpha: float = 1.0
 var _dead: bool = false
 var _is_attacking: bool = false
 var _hit_this_swing: Array = []
+var _crit_this_swing: bool = false
+var _crit_popup_pending: bool = false
 
 func _play_body(anim: String) -> void:
 	if _body.sprite_frames == null or not _body.sprite_frames.has_animation(anim):
@@ -44,7 +46,13 @@ func _process(_delta: float) -> void:
 			continue
 		if weapon_rect.has_point((enemy as Node2D).global_position):
 			_hit_this_swing.append(enemy)
-			enemy.call("take_damage", SAVE_DATA.get_damage())
+			var dmg: int = SAVE_DATA.get_damage()
+			if _crit_this_swing:
+				dmg *= 2
+				if _crit_popup_pending:
+					_crit_popup_pending = false
+					_spawn_crit_popup()
+			enemy.call("take_damage", dmg)
 
 func _get_weapon_global_rect() -> Rect2:
 	if _weapon.sprite_frames == null:
@@ -63,9 +71,29 @@ func attack() -> void:
 		return
 	_is_attacking = true
 	_hit_this_swing.clear()
+	_crit_this_swing = randf() < SAVE_DATA.get_crit_chance()
+	_crit_popup_pending = _crit_this_swing
 	_weapon.stop()
 	_play_weapon("Attack")
 	queue_redraw()
+
+func _spawn_crit_popup() -> void:
+	var label := Label.new()
+	label.text = "crit!"
+	label.add_theme_font_size_override("font_size", 8)
+	label.add_theme_color_override("font_color", Color(1.0, 0.667, 0.369))
+	label.size = Vector2(48.0, 12.0)
+	label.position = Vector2(-24.0, -40.0)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.pivot_offset = Vector2(24.0, 6.0)
+	label.scale = Vector2(1.5, 1.5)
+	add_child(label)
+	var t := create_tween()
+	t.tween_property(label, "scale", Vector2.ONE, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.set_parallel(true)
+	t.tween_property(label, "position:y", -50.0, 0.7).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	t.tween_property(label, "modulate:a", 0.0, 0.7)
+	t.chain().tween_callback(label.queue_free)
 
 func get_hp() -> int:
 	return _hp

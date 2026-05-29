@@ -22,14 +22,17 @@ var _countdown: int = 3
 var _countdown_timer: float = 0.38
 var _countdown_label: Label
 
+var wave: int = 1
+
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
 	layer = 50
 	get_tree().paused = true
 
+	var mult: float = minf(1.0 + (wave - 1) * (2.0 / 99.0), 3.0)
 	_zone_left = randf_range(8.0, _BAR_W - _ZONE_W - 8.0)
 	_dot_pos = _BAR_W * 0.5
-	_dot_vel = _DOT_SPEED * (1.0 if randf() > 0.5 else -1.0)
+	_dot_vel = _DOT_SPEED * mult * (1.0 if randf() > 0.5 else -1.0)
 
 	var overlay := ColorRect.new()
 	overlay.color = Color(0.051, 0.169, 0.271, 0.75)
@@ -70,6 +73,7 @@ func _ready() -> void:
 	_dot_ctrl.offset_top = _BAR_Y + 1.0
 	_dot_ctrl.offset_bottom = _BAR_Y + _BAR_H - 1.0
 	_dot_ctrl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_dot_ctrl.visible = false
 	add_child(_dot_ctrl)
 	_update_dot()
 
@@ -102,6 +106,8 @@ func _process(delta: float) -> void:
 				_punch_countdown()
 			else:
 				_countdown_label.queue_free()
+				_dot_ctrl.visible = true
+				_dot_vel = absf(_dot_vel) * (1.0 if randf() > 0.5 else -1.0)
 		return
 	if not _accepting_input:
 		_accepting_input = true

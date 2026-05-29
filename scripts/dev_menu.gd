@@ -10,6 +10,7 @@ var _god_mode: bool = false
 @onready var _btn_god: Button = $BtnGod
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	var empty := StyleBoxEmpty.new()
 	for btn: Button in [$BtnSkip, $BtnGod, $BtnReset]:
 		for state: String in ["normal", "hover", "pressed", "focus"]:
@@ -22,6 +23,13 @@ func _ready() -> void:
 	$BtnGod.pressed.connect(_on_god_pressed)
 	$BtnReset.pressed.connect(_on_reset_pressed)
 	_refresh_god_btn()
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey:
+		var k := event as InputEventKey
+		if k.pressed and not k.echo and k.physical_keycode in [KEY_U, KEY_ESCAPE]:
+			get_viewport().set_input_as_handled()
+			close_requested.emit()
 
 func init(god_mode_state: bool) -> void:
 	_god_mode = god_mode_state

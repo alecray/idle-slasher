@@ -2,10 +2,10 @@ extends Control
 
 @onready var _points_label: Label = $PointsLabel
 @onready var _rows: Array[Control] = [
-	$HealthRow, $DamageRow, $LuckRow, $StartWaveRow,
+	$HealthRow, $CritRow, $LuckRow, $StartWaveRow,
 ]
 
-const _STAT_KEYS: Array[String] = ["health", "damage", "luck", "start_wave"]
+const _STAT_KEYS: Array[String] = ["health", "crit", "luck", "start_wave"]
 
 func _ready() -> void:
 
@@ -38,13 +38,13 @@ func _refresh() -> void:
 	_points_label.text = "%d POINTS" % SAVE_DATA.points
 	var levels: Array[int] = [
 		SAVE_DATA.stat_health,
-		SAVE_DATA.stat_damage,
+		SAVE_DATA.stat_crit,
 		SAVE_DATA.stat_luck,
 		SAVE_DATA.stat_start_wave,
 	]
 	var effects: Array[String] = [
 		"+%d MAX HP" % SAVE_DATA.get_health_bonus(),
-		"+%d DMG" % SAVE_DATA.get_damage_bonus(),
+		"+%.1f%% CRIT" % SAVE_DATA.get_crit_pct(),
 		"+%.1f%% LUCK" % SAVE_DATA.get_luck_pct(),
 		"W%d START" % SAVE_DATA.get_start_wave(),
 	]

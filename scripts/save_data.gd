@@ -6,23 +6,26 @@ var pb_wave: int = 1
 var pb_version: String = ""
 var points: int = 0
 var stat_health: int = 0
-var stat_damage: int = 0
+var stat_crit: int = 0
 var stat_luck: int = 0
 var stat_start_wave: int = 0
 
 # Max level each stat can reach (bonus is capped at this level).
 const MAX_LEVEL: Dictionary = {
 	"health": 100,
-	"damage": 200,
+	"crit": 100,
 	"luck": 100,
-	"start_wave": 30,
+	"start_wave": 90,
 }
 
 # Bonus value reached at MAX_LEVEL.
 const HEALTH_CAP: int = 290     # +290 max HP at level 100
-const DAMAGE_CAP: int = 10      # +10 damage at level 200 (~10 points per +1)
-const LUCK_CAP: float = 30.0    # +30% luck at level 100
-const START_WAVE_CAP: int = 29  # W30 (1 + 29) at level 30
+const CRIT_CAP: float = 50.0    # +50% crit chance at level 100
+const LUCK_CAP: float = 30.0    # +30% luck (heal chance) at level 100
+const START_WAVE_CAP: int = 89  # W90 (1 + 89) at level 90
+
+# Quick-time events fire at static odds, independent of any stat.
+const QTE_CHANCE: float = 0.04
 
 func _ready() -> void:
 	load_data()
@@ -30,7 +33,7 @@ func _ready() -> void:
 func get_stat_level(stat: String) -> int:
 	match stat:
 		"health": return stat_health
-		"damage": return stat_damage
+		"crit": return stat_crit
 		"luck": return stat_luck
 		"start_wave": return stat_start_wave
 	return 0
@@ -44,11 +47,14 @@ func get_health_bonus() -> int:
 func get_max_hp() -> int:
 	return CONSTANTS.PLAYER_MAX_HP + get_health_bonus()
 
-func get_damage_bonus() -> int:
-	return roundi(float(DAMAGE_CAP) / MAX_LEVEL["damage"] * stat_damage)
-
 func get_damage() -> int:
-	return 1 + get_damage_bonus()
+	return 1
+
+func get_crit_pct() -> float:
+	return CRIT_CAP / MAX_LEVEL["crit"] * stat_crit
+
+func get_crit_chance() -> float:
+	return get_crit_pct() / 100.0
 
 func get_luck_pct() -> float:
 	return LUCK_CAP / MAX_LEVEL["luck"] * stat_luck
@@ -57,7 +63,7 @@ func get_heal_chance() -> float:
 	return 0.20 + get_luck_pct() / 100.0
 
 func get_qte_chance() -> float:
-	return 0.08 + get_luck_pct() / 100.0 * 0.4
+	return QTE_CHANCE
 
 func get_start_wave_bonus() -> int:
 	return roundi(float(START_WAVE_CAP) / MAX_LEVEL["start_wave"] * stat_start_wave)
@@ -77,7 +83,7 @@ func try_spend_point(stat: String) -> bool:
 	points -= 1
 	match stat:
 		"health": stat_health += 1
-		"damage": stat_damage += 1
+		"crit": stat_crit += 1
 		"luck": stat_luck += 1
 		"start_wave": stat_start_wave += 1
 	save_data()
@@ -89,7 +95,7 @@ func save_data() -> void:
 	cfg.set_value("stats", "pb_version", pb_version)
 	cfg.set_value("stats", "points", points)
 	cfg.set_value("upgrades", "health", stat_health)
-	cfg.set_value("upgrades", "damage", stat_damage)
+	cfg.set_value("upgrades", "crit", stat_crit)
 	cfg.set_value("upgrades", "luck", stat_luck)
 	cfg.set_value("upgrades", "start_wave", stat_start_wave)
 	cfg.save(SAVE_PATH)
@@ -99,7 +105,7 @@ func reset() -> void:
 	pb_version = ""
 	points = 0
 	stat_health = 0
-	stat_damage = 0
+	stat_crit = 0
 	stat_luck = 0
 	stat_start_wave = 0
 	save_data()
@@ -112,6 +118,6 @@ func load_data() -> void:
 	pb_version = cfg.get_value("stats", "pb_version", "")
 	points = cfg.get_value("stats", "points", 0)
 	stat_health = cfg.get_value("upgrades", "health", 0)
-	stat_damage = cfg.get_value("upgrades", "damage", 0)
+	stat_crit = cfg.get_value("upgrades", "crit", 0)
 	stat_luck = cfg.get_value("upgrades", "luck", 0)
 	stat_start_wave = cfg.get_value("upgrades", "start_wave", 0)

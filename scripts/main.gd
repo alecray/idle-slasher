@@ -115,8 +115,9 @@ func _setup_dust() -> void:
 	move_child(_dust, _player.get_index())
 
 func _update_dust_for_wave() -> void:
-	_dust.initial_velocity_min = minf(80.0 + _wave * 6.0, 220.0)
-	_dust.initial_velocity_max = minf(180.0 + _wave * 10.0, 380.0)
+	# Gentle for waves 1-5, reaching the previous baseline by wave 5, then keep ramping.
+	_dust.initial_velocity_min = minf(20.0 + (_wave - 1) * 22.5, 240.0)
+	_dust.initial_velocity_max = minf(50.0 + (_wave - 1) * 45.0, 420.0)
 
 func _pb_text() -> String:
 	if SAVE_DATA.pb_version.is_empty():
@@ -182,17 +183,12 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		var k := event as InputEventKey
 		if k.pressed and not k.echo:
-			match k.physical_keycode:
-				KEY_U:
-					if _dev_menu_open:
-						_close_dev_menu()
-					elif not _game_over and not _qte_active:
-						_open_dev_menu()
-					return
-				KEY_ESCAPE:
-					if _dev_menu_open:
-						_close_dev_menu()
-					return
+			if k.physical_keycode == KEY_U:
+				# Close is handled by the dev menu itself (it runs while paused).
+				if not _dev_menu_open and not _game_over and not _qte_active:
+					_open_dev_menu()
+					get_viewport().set_input_as_handled()
+				return
 			if not _dev_menu_open and not _game_over and not _qte_active:
 				if k.physical_keycode in [KEY_W, KEY_A, KEY_S, KEY_D]:
 					if _speech_cooldown <= 0.0:
@@ -260,12 +256,16 @@ func _on_hp_changed(new_hp: int) -> void:
 	if _god_mode and new_hp < SAVE_DATA.get_max_hp() and not _game_over:
 		_player.call("heal", SAVE_DATA.get_max_hp())
 
+func _kill_heal_amount() -> int:
+	return 1 + int(_wave / 6.0)
+
 func _on_enemy_killed(spawns_qte: bool) -> void:
 	_kills += 1
 	_kills_label.text = "Kills: %d" % _kills
 	if randf() < SAVE_DATA.get_heal_chance():
-		_player.call("heal", 1)
-		_spawn_heal_popup(1)
+		var amount: int = _kill_heal_amount()
+		_player.call("heal", amount)
+		_spawn_heal_popup(amount)
 	if spawns_qte and not _qte_active and not _game_over:
 		_trigger_qte()
 
@@ -273,13 +273,14 @@ func _trigger_qte() -> void:
 	_qte_active = true
 	var pick: int = randi() % 2
 	var qte: Node = (QTE_BAR_SCRIPT if pick == 0 else QTE_DOTS_SCRIPT).new()
+	qte.set("wave", _wave)
 	add_child(qte)
 	qte.connect("completed", _on_qte_completed)
 
 func _on_qte_completed(success: bool) -> void:
 	_qte_active = false
 	if success:
-		if _player.call("get_hp") >= CONSTANTS.PLAYER_MAX_HP:
+		if _player.call("get_hp") >= SAVE_DATA.get_max_hp():
 			_skip_waves(1)
 			_spawn_floating_text("already full hp - wave skipped!")
 		else:
@@ -405,6 +406,9 @@ func _on_player_died() -> void:
 	_game_over = true
 	_continue_wave = maxi(SAVE_DATA.get_start_wave(), _wave - 1)
 	_shake_trauma = minf(1.0, _shake_trauma + 0.8)
+	for enemy: Node in get_tree().get_nodes_in_group("enemies"):
+		if is_instance_valid(enemy):
+			enemy.call("start_celebrating")
 	_death_zoom_tween = create_tween()
 	_death_zoom_tween.tween_property(_camera, "zoom", DEATH_ZOOM, DEATH_ZOOM_DURATION) \
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
@@ -501,16 +505,19 @@ func _open_dev_menu() -> void:
 	_dev_menu_layer.connect("skip_waves_requested", _skip_waves)
 	_dev_menu_layer.connect("god_mode_toggled", func(v: bool) -> void: _god_mode = v)
 	_dev_menu_layer.connect("reset_requested", _dev_reset_game)
+	get_tree().paused = true
 
 func _close_dev_menu() -> void:
 	if not _dev_menu_open:
 		return
 	_dev_menu_open = false
+	get_tree().paused = false
 	if is_instance_valid(_dev_menu_layer):
 		_dev_menu_layer.queue_free()
 	_dev_menu_layer = null
 
 func _dev_reset_game() -> void:
 	_close_dev_menu()
+	get_tree().paused = false
 	SAVE_DATA.reset()
 	get_tree().change_scene_to_file("res://scenes/title_screen.tscn")

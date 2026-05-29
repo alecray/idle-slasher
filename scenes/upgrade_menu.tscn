@@ -73,19 +73,19 @@ offset_bottom = 16.0
 theme_override_font_sizes/font_size = 7
 text = "+"
 
-[node name="DamageRow" type="Control" parent="."]
+[node name="CritRow" type="Control" parent="."]
 offset_left = 8.0
 offset_top = 72.0
 offset_right = 312.0
 offset_bottom = 88.0
 
-[node name="NameLabel" type="Label" parent="DamageRow"]
+[node name="NameLabel" type="Label" parent="CritRow"]
 offset_right = 88.0
 offset_bottom = 16.0
 theme_override_font_sizes/font_size = 7
-text = "DAMAGE"
+text = "CRIT"
 
-[node name="LevelLabel" type="Label" parent="DamageRow"]
+[node name="LevelLabel" type="Label" parent="CritRow"]
 offset_left = 92.0
 offset_right = 148.0
 offset_bottom = 16.0
@@ -93,15 +93,15 @@ theme_override_colors/font_color = Color(1.0, 0.831, 0.639, 1)
 theme_override_font_sizes/font_size = 7
 text = "LV 0"
 
-[node name="EffectLabel" type="Label" parent="DamageRow"]
+[node name="EffectLabel" type="Label" parent="CritRow"]
 offset_left = 150.0
 offset_right = 242.0
 offset_bottom = 16.0
 theme_override_colors/font_color = Color(1.0, 0.667, 0.369, 1)
 theme_override_font_sizes/font_size = 6
-text = "+0 DMG"
+text = "+0% CRIT"
 
-[node name="PlusButton" type="Button" parent="DamageRow"]
+[node name="PlusButton" type="Button" parent="CritRow"]
 offset_left = 246.0
 offset_right = 304.0
 offset_bottom = 16.0

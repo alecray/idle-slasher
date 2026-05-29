@@ -18,12 +18,17 @@ var _cleared_dots: int = 0
 var _timer: float = 0.0
 var _timer_fill: ColorRect
 var _resolved: bool = false
+var _duration: float = _TIMER_DURATION
+
+var wave: int = 1
 
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
 	layer = 50
 	get_tree().paused = true
 
+	var mult: float = minf(1.0 + (wave - 1) * (2.0 / 99.0), 3.0)
+	_duration = _TIMER_DURATION / mult
 	_total_dots = randi_range(_MIN_DOTS, _MAX_DOTS)
 
 	var overlay := ColorRect.new()
@@ -57,8 +62,8 @@ func _process(delta: float) -> void:
 	if _resolved:
 		return
 	_timer += delta
-	_timer_fill.offset_right = _TIMER_X + _TIMER_W * minf(_timer / _TIMER_DURATION, 1.0)
-	if _timer >= _TIMER_DURATION:
+	_timer_fill.offset_right = _TIMER_X + _TIMER_W * minf(_timer / _duration, 1.0)
+	if _timer >= _duration:
 		_resolve(false)
 
 func _spawn_dot() -> void:

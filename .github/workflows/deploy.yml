@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup export templates
         run: |
@@ -32,11 +32,4 @@ jobs:
 
       - name: Install butler
         run: |
-          wget -O butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
-          unzip butler.zip
-          chmod +x butler
-
-      - name: Deploy to itch.io
-        env:
-          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-        run: ./butler push exports/web alecray/idle-slasher:html5 --userversion ${{ github.run_number }}
+          wget -O butler.zip https://broth.itc
